@@ -1,12 +1,13 @@
 package com.parsa.miniSnappFood.security;
 
+import com.parsa.miniSnappFood.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,12 +25,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
+    //  ask about this function's params later
     protected void doFilterInternal(
             @NotNull HttpServletRequest request,
-            @NotNull HttpServletResponse response,
-            @NotNull FilterChain filterChain
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
             ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
@@ -42,6 +45,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
         jwt = authHeader.substring(7);
+
+        if (tokenBlacklistService.isBlacklisted(jwt)){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         userPhone = jwtService.extractPhone(jwt);
 
         if (userPhone != null && SecurityContextHolder.getContext().getAuthentication() == null) {

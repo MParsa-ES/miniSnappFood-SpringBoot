@@ -2,6 +2,7 @@ package com.parsa.miniSnappFood.service;
 
 import com.parsa.miniSnappFood.dto.*;
 import com.parsa.miniSnappFood.exception.InvalidCredentialsException;
+import com.parsa.miniSnappFood.exception.ResourceNotFoundException;
 import com.parsa.miniSnappFood.exception.UserAlreadyExistsException;
 import com.parsa.miniSnappFood.model.User;
 import com.parsa.miniSnappFood.repository.UserRepository;
@@ -61,6 +62,40 @@ public class AuthService {
         return new AuthResponse(token, userResponse);
     }
 
+    public UserResponse getProfile(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        return mapToUserResponse(user);
+    }
+
+    public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        // validating the new email
+        if (request.getEmail() != null && !request.getEmail().isBlank()
+                && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new UserAlreadyExistsException("Email is already registered!");
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        if (user.getAddress() != null && !user.getAddress().isBlank()){
+            user.setAddress(request.getAddress());
+        }
+        if (user.getProfileImageBase64() != null && !user.getProfileImageBase64().isBlank()){
+            user.setProfileImageBase64(request.getProfileImageBase64());
+        }
+        if (request.getBankInfo() != null){
+            user.setBankInfo(request.getBankInfo());
+        }
+
+        User updatedUser = userRepository.save(user);
+
+        return mapToUserResponse(updatedUser);
+    }
 
     private UserResponse mapToUserResponse(User user) {
         return new UserResponse(
