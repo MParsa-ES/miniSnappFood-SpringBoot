@@ -82,10 +82,10 @@ public class AuthService {
             user.setEmail(request.getEmail());
         }
 
-        if (user.getAddress() != null && !user.getAddress().isBlank()){
+        if (request.getAddress() != null && !user.getAddress().isBlank()){
             user.setAddress(request.getAddress());
         }
-        if (user.getProfileImageBase64() != null && !user.getProfileImageBase64().isBlank()){
+        if (request.getProfileImageBase64() != null && !user.getProfileImageBase64().isBlank()){
             user.setProfileImageBase64(request.getProfileImageBase64());
         }
         if (request.getBankInfo() != null){
