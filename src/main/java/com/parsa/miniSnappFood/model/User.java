@@ -23,13 +23,13 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String fullName;
 
     @Column(nullable = false)
     private String phone;
 
-    @Column(nullable = true, unique = true)
+    @Column(unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -42,6 +42,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String address;
 
+    @Column(columnDefinition = "TEXT")
     private String profileImageBase64;
 
     @Embedded
@@ -59,23 +60,4 @@ public class User implements UserDetails {
         return this.phone;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }
